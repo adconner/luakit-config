@@ -243,7 +243,7 @@ add_binds("normal", {
     buf("^gy$",                     function (w) w:new_tab(w.view.history or "") end),
 
     -- Open current url in chrome
-    buf("^gc$",                     function (w) luakit.spawn("chromium --app=" .. string.gsub(w.view.uri or "", " ", "%%20")) end),
+    buf("^gc$",                     function (w) luakit.spawn("chromium " .. string.gsub(w.view.uri or "", " ", "%%20")) end),
 
     key({},          "r",           function (w) w:reload() end),
     key({},          "R",           function (w) w:reload(true) end),
