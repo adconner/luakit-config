@@ -2,6 +2,12 @@
 -- Keybindings --
 -----------------
 
+-- todo 
+--  a for bookmark binding
+--    binding for libquvi
+--      done, just need to program in exceptions, globals.lua
+--
+
 -- Binding aliases
 local key, buf, but = lousy.bind.key, lousy.bind.buf, lousy.bind.but
 local cmd, any = lousy.bind.cmd, lousy.bind.any
@@ -192,7 +198,13 @@ add_binds("normal", {
     key({"Control"}, "d", "Scroll half page down.",
         function (w) w:scroll{ ypagerel =  0.5 } end),
 
+    key({},          "d", "Scroll half page down.",
+        function (w) w:scroll{ ypagerel =  0.5 } end),
+
     key({"Control"}, "u", "Scroll half page up.",
+        function (w) w:scroll{ ypagerel = -0.5 } end),
+
+    key({},          "u", "Scroll half page up.",
         function (w) w:scroll{ ypagerel = -0.5 } end),
 
     key({"Control"}, "f", "Scroll page down.",
@@ -349,6 +361,12 @@ add_binds("normal", {
     key({"Shift","Control"}, "Tab", "Go to previous tab.",
         function (w) w:prev_tab() end),
 
+    key({"Control"}, "l", "Go to next tab.",
+        function (w) w:next_tab() end),
+
+    key({"Control"}, "h", "Go to previous tab.",
+        function (w) w:prev_tab() end),
+
     buf("^gT$", "Go to previous tab.",
         function (w) w:prev_tab() end),
 
@@ -369,8 +387,11 @@ add_binds("normal", {
     key({"Control"}, "w", "Close current tab.",
         function (w) w:close_tab() end),
 
-    key({}, "d", "Close current tab (or `[count]` tabs).",
+    key({}, "D", "Close current tab (or `[count]` tabs).",
         function (w, m) for i=1,m.count do w:close_tab() end end, {count=1}),
+
+    key({}, "U", "Undo close tab (or `[count]` tobs).",
+        function (w, m) w:undo_close_tab(-m.count) end, {count=1}),
 
     key({}, "<", "Reorder tab left `[count=1]` positions.",
         function (w, m)
@@ -391,6 +412,11 @@ add_binds("normal", {
 
     buf("^gy$", "Duplicate current tab.",
         function (w) w:new_tab(w.view.history or "") end),
+
+    buf("^gc$", "Open current tab in Chromium",
+        function (w) 
+            luakit.spawn("chromium " .. string.gsub(w.view.uri or "", " ", "%%20")) 
+        end),
 
     key({}, "r", "Reload current tab.",
         function (w) w:reload() end),
@@ -424,6 +450,54 @@ add_binds("insert", {
     key({"Control"}, "z",
         "Enter `passthrough` mode, ignores all luakit keybindings.",
         function (w) w:set_mode("passthrough") end),
+
+    key({"Control"},  "e",       
+    function (w)
+        local editor = "gvim -f -c 'set spell'" 
+        --local editor = "urxvt -e vim -c 'set spell'" 
+        local dir = "/tmp/" 
+        local time = os.time()
+        local file = dir .. time
+        local marker = "luakit_extedit_" .. time
+        local function editor_callback(exit_reason, exit_status)
+            f = io.open(file, "r")
+            s = f:read("*all")
+            f:close()
+            -- Strip the string
+            s = s:gsub("^%s*(.-)%s*$", "%1")
+            -- Escape it but remove the quotes
+            s = string.format("%q", s):sub(2, -2)
+            -- lua escaped newlines (slash+newline) into js newlines (slash+n)
+            s = s:gsub("\\\n", "\\n")
+            w:eval_js(string.format([=[
+                var e = document.getElementsByClassName('%s');
+                if(1 == e.length && e[0].disabled){
+                    e[0].focus();
+                    e[0].value = "%s";
+                    e[0].disabled = false;
+                    e[0].className = e[0].className.replace(/\b %s\b/,'');
+                }
+            ]=], marker, s, marker))
+        end
+
+        local s = w:eval_js(string.format([=[
+            var e = document.activeElement;
+            if(e && (e.tagName && 'TEXTAREA' == e.tagName || e.type && 'text' == e.type)){
+                var s = e.value;
+                e.className += " %s";
+                e.disabled = true;
+                e.value = '%s';
+                s;
+            }else 'false';
+        ]=], marker, file))
+        if "false" ~= s then
+            local f = io.open(file, "w")
+            f:write(s)
+            f:flush()
+            f:close()
+            luakit.spawn(string.format("%s %q", editor, file), editor_callback)
+        end
+    end),
 })
 
 readline_bindings = {

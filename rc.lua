@@ -99,12 +99,7 @@ require "bookmarks_chrome"
 -- Add download support
 require "downloads"
 require "downloads_chrome"
-
--- Example using xdg-open for opening downloads / showing download folders
---downloads.add_signal("open-file", function (file, mime)
---    luakit.spawn(string.format("xdg-open %q", file))
---    return true
---end)
+downloads.default_dir = os.getenv("HOME") .. "/common"
 
 -- Add vimperator-like link hinting & following
 require "follow"
@@ -138,12 +133,20 @@ require "completion"
 -- `,ts` to toggle scripts, `,tp` to toggle plugins, `,tr` to reset.
 -- Remove all "enable_scripts" & "enable_plugins" lines from your
 -- domain_props table (in config/globals.lua) as this module will conflict.
---require "noscript"
+require "noscript"
+
+noscript.enable_scripts = false
+noscript.enable_plugins = false
+
+require "adblock"
 
 require "follow_selected"
 require "go_input"
 require "go_next_prev"
 require "go_up"
+
+
+require "quvi"
 
 -----------------------------
 -- End user script loading --
