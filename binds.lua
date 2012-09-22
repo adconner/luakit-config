@@ -2,12 +2,6 @@
 -- Keybindings --
 -----------------
 
--- todo 
---  a for bookmark binding
---    binding for libquvi
---      done, just need to program in exceptions, globals.lua
---
-
 -- Binding aliases
 local key, buf, but = lousy.bind.key, lousy.bind.buf, lousy.bind.but
 local cmd, any = lousy.bind.cmd, lousy.bind.any

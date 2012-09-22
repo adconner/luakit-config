@@ -146,8 +146,6 @@ require "go_next_prev"
 require "go_up"
 
 
-require "quvi"
-
 -----------------------------
 -- End user script loading --
 -----------------------------
