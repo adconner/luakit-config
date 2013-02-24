@@ -55,6 +55,9 @@ add_binds("all", {
     key({"Control"}, "[", "Return to `normal` mode.",
         function (w) w:set_mode() end),
 
+    key({"Control"}, "c", "Return to `normal` mode.",
+        function (w) w:set_mode() end),
+
     -- Mouse bindings
     but({}, 8, "Go back.",
         function (w) w:back() end),
@@ -469,8 +472,7 @@ add_binds("insert", {
 
     key({"Control"},  "e",       
     function (w)
-        local editor = "gvim -f -c 'set spell'" 
-        --local editor = "urxvt -e vim -c 'set spell'" 
+        local editor = "urxvt -e vim -c 'set spell'" 
         local dir = "/tmp/" 
         local time = os.time()
         local file = dir .. time
@@ -485,7 +487,7 @@ add_binds("insert", {
             s = string.format("%q", s):sub(2, -2)
             -- lua escaped newlines (slash+newline) into js newlines (slash+n)
             s = s:gsub("\\\n", "\\n")
-            w:eval_js(string.format([=[
+            w.view:eval_js(string.format([=[
                 var e = document.getElementsByClassName('%s');
                 if(1 == e.length && e[0].disabled){
                     e[0].focus();
@@ -496,7 +498,7 @@ add_binds("insert", {
             ]=], marker, s, marker))
         end
 
-        local s = w:eval_js(string.format([=[
+        local s = w.view:eval_js(string.format([=[
             var e = document.activeElement;
             if(e && (e.tagName && 'TEXTAREA' == e.tagName || e.type && 'text' == e.type)){
                 var s = e.value;
