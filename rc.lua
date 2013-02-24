@@ -61,6 +61,9 @@ require "webinspector"
 -- Add sqlite3 cookiejar
 require "cookies"
 
+cookies.session_timeout = 60*60*24*7*4
+--cookies.store_session_cookies = true
+
 -- Cookie blocking by domain (extends cookies module)
 -- Add domains to the whitelist at "$XDG_CONFIG_HOME/luakit/cookie.whitelist"
 -- and blacklist at "$XDG_CONFIG_HOME/luakit/cookie.blacklist".
